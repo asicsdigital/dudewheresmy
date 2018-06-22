@@ -2,9 +2,10 @@ package hostip
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -31,6 +32,8 @@ func Command() cli.Command {
 }
 
 func action(*cli.Context) error {
+	log.SetLevel(log.WarnLevel)
+
 	hostips := make(chan string)
 	hostip := localhost
 

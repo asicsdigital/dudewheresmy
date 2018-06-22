@@ -46,6 +46,12 @@
   revision = "0b12d6b5"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "418b41d23a1bf978c06faea5313ba194650ac088"
+  version = "v0.8.7"
+
+[[projects]]
   name = "gopkg.in/urfave/cli.v1"
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
@@ -54,6 +60,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8b7c9d63b98876525e5edce2d1e0aa13c5561b34ffb30fab5a391a19f00559ae"
+  inputs-digest = "d51743b119d9e1214c2106991bf33d64f7789524ba8e1e71b28a1b1c39b2b58d"
   solver-name = "gps-cdcl"
   solver-version = 1

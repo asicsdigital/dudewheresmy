@@ -1,17 +1,27 @@
 package main
 
 import (
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/asicsdigital/dudewheresmy/commands/hostip"
 	"gopkg.in/urfave/cli.v1"
 )
 
+const (
+	appname    string = "dudewheresmy"
+	appversion string = "v0.1.0"
+	appusage   string = "find things you're looking for"
+)
+
 func main() {
+	log.SetLevel(log.WarnLevel)
+
 	app := cli.NewApp()
-	app.Name = "dudewheresmy"
-	app.Usage = "find things you're looking for"
+	app.Name = appname
+	app.Version = appversion
+	app.Usage = appusage
 
 	app.Commands = []cli.Command{
 		hostip.Command(),
