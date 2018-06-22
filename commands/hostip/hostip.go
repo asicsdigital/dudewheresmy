@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -14,6 +15,7 @@ const (
 	dockerlocal  string = "host.docker.internal"
 	localhost    string = "127.0.0.1"
 	metadatapath string = "local-ipv4"
+	timeoutsec   = 2
 )
 
 func Command() cli.Command {
@@ -29,34 +31,39 @@ func Command() cli.Command {
 }
 
 func action(*cli.Context) error {
-	hostip, err := fromEc2Metadata()
+	hostips := make(chan string)
+	hostip := localhost
 
-	if err != nil {
-		log.Print(err)
+	go fromEc2Metadata(hostips)
+	go fromDockerInternal(hostips)
+
+	select {
+	case res := <-hostips:
+		hostip = res
+	case <-time.After(timeoutsec * time.Second):
+		log.Printf("timeout after %d seconds", timeoutsec)
 	}
 
-	hostip, err = fromDockerInternal()
+	err := parseAndPrint(hostip)
 
-	if err != nil {
-		log.Print(err)
-	}
+	return err
+}
 
-	if hostip == "" {
-		hostip = localhost
-	}
+func parseAndPrint(i string) error {
+	parsed := net.ParseIP(i)
 
-	parsed := net.ParseIP(hostip)
+	var err error
 
 	if parsed != nil {
 		_, err = fmt.Printf("%v\n", parsed)
 	} else {
-		err = fmt.Errorf("unable to parse %v as an IP address", hostip)
+		err = fmt.Errorf("unable to parse %v as an IP address", i)
 	}
 
 	return err
 }
 
-func fromEc2Metadata() (string, error) {
+func fromEc2Metadata(c chan string) {
 	sess := session.Must(session.NewSession())
 
 	client := ec2metadata.New(sess)
@@ -64,18 +71,18 @@ func fromEc2Metadata() (string, error) {
 	if client.Available() {
 		hostip, err := client.GetMetadata(metadatapath)
 
-		return hostip, err
-	} else {
-		return "", fmt.Errorf("EC2 metadata service not available")
+		if err != nil {
+			log.Panic(err)
+		} else {
+			c <- hostip
+		}
 	}
 }
 
-func fromDockerInternal() (string, error) {
+func fromDockerInternal(c chan string) {
 	hostips, err := net.LookupHost(dockerlocal)
 
-	if err != nil {
-		return "", err
-	} else {
-		return hostips[0], err
+	if err == nil {
+		c <- hostips[0]
 	}
 }
