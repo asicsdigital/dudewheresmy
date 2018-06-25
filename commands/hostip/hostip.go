@@ -34,7 +34,8 @@ func Command() cli.Command {
 func action(*cli.Context) error {
 	log.SetLevel(log.WarnLevel)
 
-	hostips := make(chan string)
+	// the channel only needs to be big enough for one response
+	hostips := make(chan string, 1)
 	hostip := localhost
 
 	go fromEc2Metadata(hostips)
