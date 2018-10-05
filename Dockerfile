@@ -1,5 +1,5 @@
 # https://docs.docker.com/develop/develop-images/multistage-build/
-FROM golang:1.10
+FROM golang:1.11
 WORKDIR /go/src/github.com/asicsdigital/dudewheresmy
 COPY . .
 RUN go get -d -v ./...
