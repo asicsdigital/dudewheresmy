@@ -59,10 +59,9 @@ $ dudewheresmy hostip
 
 ## Contributing
 
-This tool is built with [urfave/cli](https://github.com/urfave/cli).  To add another subcommand:
+This tool is built with [spf13/cobra](https://github.com/spf13/cobra).  To add another subcommand:
 
-1. `mkdir -p commands/<YOUR SUBCOMMAND>`
-2. `$EDITOR commands/<YOUR SUBCOMMAND>/<YOUR SUBCOMMAND>.go`
-3. Declare a new package namespace for your subcommand.
-4. Define a `Command()` function that returns a `cli.Command` struct
-5. Import `github.com/asicsdigital/dudewheresmy/commands/<YOUR SUBCOMMAND>` from main.go
+1. `go get github.com/spf13/cobra`
+2. Ensure that `$GOPATH/bin` is in your PATH ([direnv](https://direnv.net/) will do this for you).
+3. `cobra add <COMMAND_NAME>`
+4. `$EDITOR cmd/<COMMAND_NAME>.go`
