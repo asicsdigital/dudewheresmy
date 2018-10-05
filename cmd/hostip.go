@@ -1,38 +1,37 @@
-package hostip
+package cmd
 
 import (
 	"fmt"
 	"net"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	jww "github.com/spf13/jwalterweatherman"
 
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"gopkg.in/urfave/cli.v1"
 )
 
 const (
 	dockerlocal  string = "host.docker.internal"
 	localhost    string = "127.0.0.1"
 	metadatapath string = "local-ipv4"
-	timeoutsec   = 2
+	timeoutsec          = 2
 )
 
-func Command() cli.Command {
-	c := cli.Command{
-		Name:      "hostip",
-		ShortName: "i",
-		Aliases:   []string{"ip", "host"},
-		Usage:     "find IP address of process host",
-		Action:    action,
-	}
-
-	return c
+func init() {
+	rootCmd.AddCommand(hostipCmd)
 }
 
-func action(*cli.Context) error {
-	log.SetLevel(log.WarnLevel)
+var hostipCmd = &cobra.Command{
+	Use:   "hostip",
+	Short: "find IP address of process host",
+	Run: func(cmd *cobra.Command, args []string) {
+		hostIp()
+	},
+}
+
+func hostIp() {
 
 	// the channel only needs to be big enough for one response
 	hostips := make(chan string, 1)
@@ -45,12 +44,14 @@ func action(*cli.Context) error {
 	case res := <-hostips:
 		hostip = res
 	case <-time.After(timeoutsec * time.Second):
-		log.Printf("timeout after %d seconds", timeoutsec)
+		jww.DEBUG.Printf("timeout after %d seconds", timeoutsec)
 	}
 
 	err := parseAndPrint(hostip)
 
-	return err
+	if err != nil {
+		jww.FATAL.Println(err)
+	}
 }
 
 func parseAndPrint(i string) error {
@@ -76,7 +77,7 @@ func fromEc2Metadata(c chan string) {
 		hostip, err := client.GetMetadata(metadatapath)
 
 		if err != nil {
-			log.Panic(err)
+			jww.FATAL.Println(err)
 		} else {
 			c <- hostip
 		}
