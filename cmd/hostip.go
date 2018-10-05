@@ -24,8 +24,9 @@ func init() {
 }
 
 var hostipCmd = &cobra.Command{
-	Use:   "hostip",
-	Short: "find IP address of process host",
+	Use:     "hostip",
+	Aliases: []string{"i", "ip", "host"},
+	Short:   "find IP address of process host",
 	Run: func(cmd *cobra.Command, args []string) {
 		hostIp()
 	},
